@@ -874,7 +874,7 @@ static void update_curr(struct cfs_rq *cfs_rq)
 	if (entity_is_task(curr)) {
 		struct task_struct *curtask = task_of(curr);
 
-		trace_sched_stat_runtime(curtask, delta_exec, curr->vruntime);
+//		trace_sched_stat_runtime(curtask, delta_exec, curr->vruntime);
 		cpuacct_charge(curtask, delta_exec);
 		account_group_exec_runtime(curtask, delta_exec);
 	}
@@ -917,7 +917,7 @@ update_stats_wait_end(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			se->statistics.wait_start = delta;
 			return;
 		}
-		trace_sched_stat_wait(p, delta);
+//		trace_sched_stat_wait(p, delta);
 	}
 
 	se->statistics.wait_max = max(se->statistics.wait_max, delta);
@@ -1743,14 +1743,14 @@ static int task_numa_migrate(struct task_struct *p)
 
 	if (env.best_task == NULL) {
 		ret = migrate_task_to(p, env.best_cpu);
-		if (ret != 0)
-			trace_sched_stick_numa(p, env.src_cpu, env.best_cpu);
+//		if (ret != 0)
+//			trace_sched_stick_numa(p, env.src_cpu, env.best_cpu);
 		return ret;
 	}
 
 	ret = migrate_swap(p, env.best_task);
-	if (ret != 0)
-		trace_sched_stick_numa(p, env.src_cpu, task_cpu(env.best_task));
+//	if (ret != 0)
+//		trace_sched_stick_numa(p, env.src_cpu, task_cpu(env.best_task));
 	put_task_struct(env.best_task);
 	return ret;
 }
@@ -4312,8 +4312,8 @@ update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq, bool update_freq)
 #endif
 
 	/* Trace CPU load, unless cfs_rq belongs to a non-root task_group */
-	if (cfs_rq == &rq_of(cfs_rq)->cfs)
-		trace_sched_load_avg_cpu(cpu_of(rq_of(cfs_rq)), cfs_rq);
+//	if (cfs_rq == &rq_of(cfs_rq)->cfs)
+//		trace_sched_load_avg_cpu(cpu_of(rq_of(cfs_rq)), cfs_rq);
 
 	if (update_freq && (decayed || removed_util))
 		cfs_rq_util_change(cfs_rq);
@@ -4334,7 +4334,7 @@ static inline void update_load_avg(struct sched_entity *se, int flags)
 	u64 now = cfs_rq_clock_task(cfs_rq);
 	int cpu = cpu_of(rq_of(cfs_rq));
 	int decayed;
-	void *ptr = NULL;
+//	void *ptr = NULL;
 
 	/*
 	 * Track task load average for carrying it to new CPU after migrated, and
@@ -4356,7 +4356,7 @@ static inline void update_load_avg(struct sched_entity *se, int flags)
 #ifdef CONFIG_SCHED_WALT
 		ptr = (void *)&(task_of(se)->ravg);
 #endif
-		trace_sched_load_avg_task(task_of(se), &se->avg, ptr);
+//		trace_sched_load_avg_task(task_of(se), &se->avg, ptr);
 	}
 }
 
@@ -4570,7 +4570,7 @@ static void enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 
 		if (tsk) {
 			account_scheduler_latency(tsk, delta >> 10, 1);
-			trace_sched_stat_sleep(tsk, delta);
+//			trace_sched_stat_sleep(tsk, delta);
 		}
 	}
 	if (se->statistics.block_start) {
@@ -4589,11 +4589,11 @@ static void enqueue_sleeper(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			if (tsk->in_iowait) {
 				se->statistics.iowait_sum += delta;
 				se->statistics.iowait_count++;
-				trace_sched_stat_iowait(tsk, delta);
+//				trace_sched_stat_iowait(tsk, delta);
 			}
 
-			trace_sched_stat_blocked(tsk, delta);
-			trace_sched_blocked_reason(tsk);
+//			trace_sched_stat_blocked(tsk, delta);
+//			trace_sched_blocked_reason(tsk);
 
 			/*
 			 * Blocking time is in units of nanosecs, so shift by
@@ -6008,7 +6008,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		if (!task_new && !rq->rd->overutilized &&
 		    cpu_overutilized(rq->cpu)) {
 			rq->rd->overutilized = true;
-			trace_sched_overutilized(true);
+//			trace_sched_overutilized(true);
 		}
 	}
 
@@ -6887,11 +6887,11 @@ static inline int __energy_diff(struct energy_env *eenv)
 	eenv->nrg.diff = eenv->nrg.after - eenv->nrg.before;
 	eenv->payoff = 0;
 #ifndef CONFIG_SCHED_TUNE
-	trace_sched_energy_diff(eenv->task,
-			eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
-			eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
-			eenv->cap.before, eenv->cap.after, eenv->cap.delta,
-			eenv->nrg.delta, eenv->payoff);
+//	trace_sched_energy_diff(eenv->task,
+//			eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
+//			eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
+//			eenv->cap.before, eenv->cap.after, eenv->cap.delta,
+//			eenv->nrg.delta, eenv->payoff);
 #endif
 	/*
 	 * Dead-zone margin preventing too many migrations.
@@ -6965,11 +6965,11 @@ energy_diff(struct energy_env *eenv)
 
 	/* Return energy diff when boost margin is 0 */
 	if (boost == 0) {
-		trace_sched_energy_diff(eenv->task,
-				eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
-				eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
-				eenv->cap.before, eenv->cap.after, eenv->cap.delta,
-				0, -eenv->nrg.diff);
+//		trace_sched_energy_diff(eenv->task,
+//				eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
+//				eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
+//				eenv->cap.before, eenv->cap.after, eenv->cap.delta,
+//				0, -eenv->nrg.diff);
 		return eenv->nrg.diff;
 	}
 
@@ -6982,11 +6982,11 @@ energy_diff(struct energy_env *eenv)
 			eenv->cap.delta,
 			eenv->task);
 
-	trace_sched_energy_diff(eenv->task,
-			eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
-			eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
-			eenv->cap.before, eenv->cap.after, eenv->cap.delta,
-			eenv->nrg.delta, eenv->payoff);
+//	trace_sched_energy_diff(eenv->task,
+//			eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
+//			eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
+//			eenv->cap.before, eenv->cap.after, eenv->cap.delta,
+//			eenv->nrg.delta, eenv->payoff);
 
 	/*
 	 * When SchedTune is enabled, the energy_diff() function will return
@@ -7215,7 +7215,7 @@ boosted_cpu_util(int cpu)
 	unsigned long util = cpu_util_freq(cpu);
 	long margin = schedtune_cpu_margin(util, cpu);
 
-	trace_sched_boost_cpu(cpu, util, margin);
+//	trace_sched_boost_cpu(cpu, util, margin);
 
 	return util + margin;
 }
@@ -7226,7 +7226,7 @@ boosted_task_util(struct task_struct *task)
 	unsigned long util = task_util(task);
 	long margin = schedtune_task_margin(task);
 
-	trace_sched_boost_task(task, util, margin);
+//	trace_sched_boost_task(task, util, margin);
 
 	return util + margin;
 }
@@ -7694,10 +7694,10 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 					schedstat_inc(p, se.statistics.nr_wakeups_fbt_pref_idle);
 					schedstat_inc(this_rq(), eas_stats.fbt_pref_idle);
 
-					trace_sched_find_best_target(p,
-							prefer_idle, min_util,
-							cpu, best_idle_cpu,
-							best_active_cpu, i);
+//					trace_sched_find_best_target(p,
+//							prefer_idle, min_util,
+//							cpu, best_idle_cpu,
+//							best_active_cpu, i);
 
 					return i;
 				}
@@ -7857,9 +7857,9 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 		? best_active_cpu
 		: best_idle_cpu;
 
-	trace_sched_find_best_target(p, prefer_idle, min_util, cpu,
-				     best_idle_cpu, best_active_cpu,
-				     target_cpu);
+//	trace_sched_find_best_target(p, prefer_idle, min_util, cpu,
+//				     best_idle_cpu, best_active_cpu,
+//				     target_cpu);
 
 	schedstat_inc(p, se.statistics.nr_wakeups_fbt_count);
 	schedstat_inc(this_rq(), eas_stats.fbt_count);
@@ -9928,12 +9928,12 @@ next_group:
 		/* Update over-utilization (tipping point, U >= 0) indicator */
 		if (energy_aware() && env->dst_rq->rd->overutilized != overutilized) {
 			env->dst_rq->rd->overutilized = overutilized;
-			trace_sched_overutilized(overutilized);
+//			trace_sched_overutilized(overutilized);
 		}
 	} else {
 		if (energy_aware() && !env->dst_rq->rd->overutilized && overutilized) {
 			env->dst_rq->rd->overutilized = true;
-			trace_sched_overutilized(true);
+//			trace_sched_overutilized(true);
 		}
 	}
 
@@ -10818,11 +10818,11 @@ out_one_pinned:
 			(sd->balance_interval < sd->max_interval))
 		sd->balance_interval *= 2;
 out:
-	trace_sched_load_balance(this_cpu, idle, *continue_balancing,
-				 group ? group->cpumask[0] : 0,
-				 busiest ? busiest->nr_running : 0,
-				 env.imbalance, env.flags, ld_moved,
-				 sd->balance_interval);
+//	trace_sched_load_balance(this_cpu, idle, *continue_balancing,
+//				 group ? group->cpumask[0] : 0,
+//				 busiest ? busiest->nr_running : 0,
+//				 env.imbalance, env.flags, ld_moved,
+//				 sd->balance_interval);
 	return ld_moved;
 }
 
@@ -11679,7 +11679,7 @@ static void task_tick_fair(struct rq *rq, struct task_struct *curr, int queued)
 	if (energy_aware() &&
 	    !rq->rd->overutilized && cpu_overutilized(task_cpu(curr))) {
 		rq->rd->overutilized = true;
-		trace_sched_overutilized(true);
+//		trace_sched_overutilized(true);
 	}
 
 	rq->misfit_task = !task_fits_max(curr, rq->cpu);
