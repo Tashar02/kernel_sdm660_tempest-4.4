@@ -35,9 +35,21 @@ enum sde_rot_dbg_evtlog_flag {
 
 #define SDEROT_EVTLOG_TOUT_HANDLER(...)
 
+#ifdef CONFIG_DEBUG_FS
 void sde_rot_evtlog(const char *name, int line, int flag, ...);
-void sde_rot_dump_panic(void);
 void sde_rot_evtlog_tout_handler(bool queue, const char *name, ...);
+#else
+static inline
+void sde_rot_evtlog(const char *name, int line, int flag, ...)
+{
+}
+
+static inline
+void sde_rot_evtlog_tout_handler(bool queue, const char *name, ...)
+{
+}
+#endif
+void sde_rot_dump_panic(void);
 
 struct sde_rotator_device;
 
