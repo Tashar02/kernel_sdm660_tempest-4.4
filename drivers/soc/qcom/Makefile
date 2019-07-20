@@ -116,3 +116,9 @@ obj-$(CONFIG_MFSE_QMI) += mfse_qmi_v01.o mfse_qmi.o
 ifdef CONFIG_MACH_XIAOMI
 obj-y += serial_num.o
 endif
+ifeq ($(CONFIG_ANDROID),y)
+CFLAGS_rpm_stats.o += -DCONFIG_DEBUG_FS
+CFLAGS_rpm_master_stat.o += -DCONFIG_DEBUG_FS
+CFLAGS_rpm_rail_stats.o += -DCONFIG_DEBUG_FS
+CFLAGS_system_stats.o += -DCONFIG_DEBUG_FS
+endif
