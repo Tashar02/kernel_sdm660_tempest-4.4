@@ -366,7 +366,6 @@ AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
 CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
 
-
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE    := \
 		-I$(srctree)/arch/$(hdr-arch)/include/uapi \
@@ -692,18 +691,34 @@ else
 KBUILD_CFLAGS	+= -O2
 endif
 
-ifeq ($(cc-name),gcc)
-KBUILD_CFLAGS	+= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53 -march=armv8-a+crc+crypto
-KBUILD_AFLAGS	+= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53 -march=armv8-a+crc+crypto
-endif
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53 -march=armv8-a+crc+crypto
-KBUILD_AFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53 -march=armv8-a+crc+crypto
-endif
-
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
 endif
+
+# Tell compiler to tune the performance of the code for a specified target processor
+ifeq ($(cc-name),clang)
+ifdef CONFIG_LLVM_POLLY
+POLLY_FLAGS	:= -mllvm -polly \
+		   -mllvm -polly-run-dce \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-opt-fusion=max \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-detect-keep-going \
+		   -mllvm -polly-vectorizer=stripmine \
+		   -mllvm -polly-invariant-load-hoisting
+else
+POLLY_FLAGS	:=
+endif
+OPT_FLAGS	:= -funsafe-math-optimizations -ffast-math -fopenmp \
+		   -mcpu=cortex-a53 -mtune=cortex-a53 -march=armv8-a+crc+crypto \
+		   $(POLLY_FLAGS)
+else
+OPT_FLAGS	:= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53 \
+		   -march=armv8-a+crc+crypto
+endif
+
+KBUILD_CFLAGS	+= $(OPT_FLAGS)
+KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
