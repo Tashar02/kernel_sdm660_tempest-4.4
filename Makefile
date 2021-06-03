@@ -740,6 +740,18 @@ KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
 else ifeq ($(cc-name),gcc)
 OPT_FLAGS	+= -mtune=cortex-a73.cortex-a53
+ifdef CONFIG_GCC_GRAPHITE
+GRAPHITE_FLAGS	+= -floop-block \
+			 -ftree-vectorize \
+			 -floop-strip-mine \
+			 -floop-interchange \
+			 -fgraphite-identity \
+			 -floop-nest-optimize \
+			 -ftree-loop-distribution
+
+OPT_FLAGS	+= $(GRAPHITE_FLAGS)
+KBUILD_LDFLAGS	+= $(GRAPHITE_FLAGS)
+endif
 endif
 endif
 
