@@ -366,7 +366,6 @@ AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
 CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
 
-
 # Use USERINCLUDE when you must reference the UAPI directories only.
 USERINCLUDE    := \
 		-I$(srctree)/arch/$(hdr-arch)/include/uapi \
@@ -686,20 +685,43 @@ KBUILD_CFLAGS	+= $(call cc-option,-ffunction-sections,)
 KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
-KBUILD_CFLAGS	+= -O3
+ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+KBUILD_CFLAGS	+= -Os
 else
-KBUILD_CFLAGS	+= -O2
+OPT_FLAGS	:= -O3 -march=armv8-a+crc+crypto
+ifeq ($(cc-name),clang)
+OPT_FLAGS	+= -mtune=cortex-a53
+ifdef CONFIG_LLVM_POLLY
+POLLY_FLAGS := -mllvm -polly \
+	     -mllvm -polly-run-dce \
+	     -mllvm -polly-run-inliner \
+	     -mllvm -polly-ast-use-context \
+	     -mllvm -polly-detect-keep-going \
+	     -mllvm -polly-vectorizer=stripmine \
+	     -mllvm -polly-invariant-load-hoisting
+
+ifeq ($(call clang-ifversion, -gt, 130000, y), y)
+POLLY_FLAGS	+= -mllvm -polly-loopfusion-greedy=1 \
+	     -mllvm -polly-reschedule=1 \
+	     -mllvm -polly-postopts=1 \
+	     -mllvm -polly-num-threads=0 \
+	     -mllvm -polly-omp-backend=LLVM \
+	     -mllvm -polly-scheduling=dynamic \
+	     -mllvm -polly-scheduling-chunksize=1
+else
+POLLY_FLAGS += -mllvm -polly-opt-fusion=max
 endif
 
-ifeq ($(cc-name),gcc)
-KBUILD_CFLAGS	+= -march=armv8-a+crc+crypto -mtune=cortex-a73.cortex-a53
-KBUILD_AFLAGS	+= -march=armv8-a+crc+crypto -mtune=cortex-a73.cortex-a53
+OPT_FLAGS	+= $(POLLY_FLAGS)
+KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -march=armv8-a+crc+crypto -mtune=cortex-a53
-KBUILD_AFLAGS	+= -march=armv8-a+crc+crypto -mtune=cortex-a53
+else ifeq ($(cc-name),gcc)
+OPT_FLAGS	+= -mtune=cortex-a73.cortex-a53
 endif
+endif
+
+KBUILD_CFLAGS	+= $(OPT_FLAGS)
+KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
 ifdef CONFIG_CC_WERROR
 KBUILD_CFLAGS	+= -Werror
