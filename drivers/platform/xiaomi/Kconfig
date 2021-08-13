@@ -21,18 +21,6 @@ menu "Xiaomi board selection"
 		help
 		  Support for Mi boards
 
-	config MACH_XIAOMI_JASON
-		bool "Xiaomi jason board"
-		select MACH_MI
-		help
-		  Support for Xiaomi Mi Note 3
-
-	config MACH_XIAOMI_PLATINA
-		bool "Xiaomi platina board"
-		select MACH_MI
-		help
-		  Support for Xiaomi Mi 8 Lite
-
 	config MACH_LONGCHEER
 		bool "Longcheer board"
 		select MACH_XIAOMI_SDM660
@@ -61,6 +49,6 @@ menu "Xiaomi board selection"
 		bool "Xiaomi wayne board"
 		select MACH_LONGCHEER
 		help
-		  Support for Xiaomi MI 6X variant
+		  Support for Xiaomi MI 6X / Mi A2 variant
 
 endmenu
