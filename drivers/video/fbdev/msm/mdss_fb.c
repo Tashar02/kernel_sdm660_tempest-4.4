@@ -48,9 +48,6 @@
 #include <linux/dma-buf.h>
 #include <sync.h>
 #include <sw_sync.h>
-#ifdef CONFIG_MACH_MI
-#include <linux/interrupt.h>
-#endif
 #ifdef CONFIG_MACH_XIAOMI_SDM660
 #include <linux/wakelock.h>
 #endif
@@ -92,9 +89,6 @@
 
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
-#ifdef CONFIG_MACH_MI
-static struct msm_fb_data_type *mfd_data;
-#endif
 
 static u32 mdss_fb_pseudo_palette[16] = {
 	0x00000000, 0xffffffff, 0xffffffff, 0xffffffff,
@@ -151,13 +145,11 @@ static void prim_panel_off_delayed_work(struct work_struct *work)
 #endif
 		return;
 	}
-
 	if (atomic_read(&prim_panel_is_on)) {
 		fb_blank(prim_fbi, FB_BLANK_POWERDOWN);
 		atomic_set(&prim_panel_is_on, false);
 		wake_unlock(&prim_panel_wakelock);
 	}
-
 	unlock_fb_info(prim_fbi);
 #ifdef CONFIG_FRAMEBUFFER_CONSOLE
 	console_unlock();
@@ -1281,46 +1273,6 @@ static int mdss_fb_init_panel_modes(struct msm_fb_data_type *mfd,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_MI
-static irqreturn_t esd_err_irq_handle(int irq, void *data)
-{
-	struct msm_fb_data_type *mfd = data;
-
-	if (mfd && mdss_fb_is_power_off(mfd)) {
-		pr_debug("%s: ESD at power off state \n", __func__);
-		return IRQ_HANDLED;
-	}
-
-	pr_info("%s: ESD ERR detected!\n", __func__);
-
-	if (mfd) {
-		struct mdss_panel_data *pdata =
-			dev_get_platdata(&mfd->pdev->dev);
-		if (pdata->panel_info.panel_dead == true) {
-			pr_err("%s:already in recoverying", __func__);
-			return IRQ_HANDLED;
-		}
-		mdss_fb_report_panel_dead(mfd);
-	}
-	else
-		pr_err("%s: mfd is NULL\n", __func__);
-
-	return IRQ_HANDLED;
-}
-
-void mdss_fb_prim_panel_recover(void)
-{
-	pr_info("Primary panel recover...\n");
-
-	if (mfd_data)
-		mdss_fb_report_panel_dead(mfd_data);
-	else
-		pr_err("%s: Primary panel mfd is NULL\n", __func__);
-
-	pr_info("Primary panel recover done\n");
-}
-#endif
-
 static int mdss_fb_probe(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd = NULL;
@@ -1481,25 +1433,6 @@ static int mdss_fb_probe(struct platform_device *pdev)
 			pr_err("failed to register input handler\n");
 
 	INIT_DELAYED_WORK(&mfd->idle_notify_work, __mdss_fb_idle_notify_work);
-
-#ifdef CONFIG_MACH_MI
-	if (mfd->panel_info->esd_err_irq > 0) {
-		if (mfd->panel_info->esd_interrupt_flags) {
-			rc = request_threaded_irq(mfd->panel_info->esd_err_irq, NULL,
-				esd_err_irq_handle, (unsigned long)mfd->panel_info->esd_interrupt_flags,
-				"esd_err_irq", mfd);
-			if (rc < 0) {
-				pr_err("%s: request irq %d, flag:0x%x  failed\n", __func__, mfd->panel_info->esd_err_irq,
-					mfd->panel_info->esd_interrupt_flags);
-			}
-		}
-	}
-
-	if (mfd->panel_info->is_prim_panel) {
-		mfd_data = mfd;
-		pdata->panel_dead_report = mdss_fb_prim_panel_recover;
-	}
-#endif
 
 	return rc;
 }
@@ -1721,18 +1654,15 @@ static int mdss_fb_resume(struct platform_device *pdev)
 static int mdss_fb_pm_prepare(struct device *dev)
 {
 	struct msm_fb_data_type *mfd = dev_get_drvdata(dev);
-
 	if (!mfd)
 		return -ENODEV;
 	if (mfd->panel_info->is_prim_panel)
 		atomic_inc(&mfd->resume_pending);
 	return 0;
 }
-
 static void mdss_fb_pm_complete(struct device *dev)
 {
 	struct msm_fb_data_type *mfd = dev_get_drvdata(dev);
-
 	if (!mfd)
 		return;
 	if (mfd->panel_info->is_prim_panel) {
@@ -5384,25 +5314,6 @@ int mdss_fb_get_phys_info(dma_addr_t *start, unsigned long *len, int fb_num)
 }
 EXPORT_SYMBOL(mdss_fb_get_phys_info);
 
-#ifdef CONFIG_MACH_MI
-bool mdss_panel_is_prim(void *fbinfo)
-{
-	struct msm_fb_data_type *mfd;
-	struct mdss_panel_info *pinfo;
-	struct fb_info *fbi = fbinfo;
-
-	if (!fbi)
-		return false;
-	mfd = fbi->par;
-	if (!mfd)
-		return false;
-	pinfo = mfd->panel_info;
-	if (!pinfo)
-		return false;
-	return pinfo->is_prim_panel;
-}
-#endif
-
 int __init mdss_fb_init(void)
 {
 	int rc = -ENODEV;
@@ -5524,7 +5435,6 @@ int mdss_prim_panel_fb_unblank(int timeout)
 {
 	int ret = 0;
 	struct msm_fb_data_type *mfd = NULL;
-
 	if (prim_fbi) {
 		mfd = (struct msm_fb_data_type *)prim_fbi->par;
 		ret = wait_event_timeout(mfd->resume_wait_q,
@@ -5566,7 +5476,6 @@ int mdss_prim_panel_fb_unblank(int timeout)
 #endif
 		return ret;
 	}
-
 	pr_err("primary panel is not existed\n");
 	return -EINVAL;
 }

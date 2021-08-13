@@ -19,14 +19,13 @@
 
 #ifdef CONFIG_MACH_LONGCHEER
 extern bool enable_gesture_mode;
-#endif
-
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 extern bool synaptics_gesture_enable_flag;
 #elif defined(CONFIG_MACH_XIAOMI_TULIP)
 extern bool focal_gesture_mode;
 #elif defined(CONFIG_MACH_XIAOMI_WHYRED)
 extern bool synaptics_gesture_func_on;
+#endif
 #endif
 
 #define MAX_I2C_CMDS  16
@@ -224,10 +223,6 @@ vreg_get_fail:
 } /* msm_dss_config_vreg */
 EXPORT_SYMBOL(msm_dss_config_vreg);
 
-#ifdef CONFIG_MACH_LONGCHEER
-extern bool ESD_TE_status;
-#endif
-
 int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 {
 	int i = 0, rc = 0;
@@ -237,18 +232,18 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 #ifdef CONFIG_MACH_LONGCHEER
 			/* vddio lab ibb continus supply */
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
-			if(enable_gesture_mode || synaptics_gesture_enable_flag) {
+			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
 #elif defined(CONFIG_MACH_XIAOMI_TULIP)
-			if(enable_gesture_mode || focal_gesture_mode) {
+			if (enable_gesture_mode || focal_gesture_mode) {
 #elif defined(CONFIG_MACH_XIAOMI_WAYNE)
-			if(enable_gesture_mode) {
+			if (enable_gesture_mode) {
 #elif defined(CONFIG_MACH_XIAOMI_WHYRED)
-			if(enable_gesture_mode || synaptics_gesture_func_on) {
+			if (enable_gesture_mode || synaptics_gesture_func_on) {
 #endif
-				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
-						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
-						(strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
-					printk(KERN_ERR "[LCD][TP][Gesture][resume] '%s' power continus supply\n",in_vreg[i].vreg_name);
+				if ((strcmp(in_vreg[i].vreg_name, "lab") == 0)
+				|| (strcmp(in_vreg[i].vreg_name, "ibb") == 0)
+				|| (strcmp(in_vreg[i].vreg_name, "wqhd-vddio") == 0)) {
+					printk(KERN_ERR "[LCD][TP][Gesture][resume] '%s' power continus supply\n", in_vreg[i].vreg_name);
 					continue;
 				}
 			}
@@ -286,14 +281,6 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 	} else {
 		for (i = num_vreg-1; i >= 0; i--) {
 #ifdef CONFIG_MACH_LONGCHEER
-			if(ESD_TE_status){
-				printk(KERN_ERR "panel esd check recovery \n");
-				if((strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
-						printk(KERN_ERR "panel '%s' power continus supply\n",in_vreg[i].vreg_name);
-						continue;
-				}
-			}
-			/* vddio lab ibb continus supply */
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
 #elif defined(CONFIG_MACH_XIAOMI_TULIP)
@@ -303,9 +290,9 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 #elif defined(CONFIG_MACH_XIAOMI_WHYRED)
 			if (enable_gesture_mode || synaptics_gesture_func_on) {
 #endif
-				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
-						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
-						(strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
+				if ((strcmp(in_vreg[i].vreg_name, "lab") == 0)
+				|| (strcmp(in_vreg[i].vreg_name, "ibb") == 0)
+				|| (strcmp(in_vreg[i].vreg_name, "wqhd-vddio") == 0)) {
 					printk(KERN_ERR "[LCD][TP][Gesture][suspend] '%s' power continus supply\n",in_vreg[i].vreg_name);
 					continue;
 				}
