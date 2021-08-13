@@ -124,3 +124,16 @@ android/configs/android-*.cfg
 #Ignoring Android.bp link file
 #
 Android.bp
+
+#
+# Ignore build scripts and build directories
+#
+/build-scripts
+/out
+/work
+/wayne
+/tulip
+/lavender
+/whyred
+/jason
+/platina
