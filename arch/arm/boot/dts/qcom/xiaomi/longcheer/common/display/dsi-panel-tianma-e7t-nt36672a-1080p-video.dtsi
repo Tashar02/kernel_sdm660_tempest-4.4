@@ -111,6 +111,9 @@
 		qcom,mdss-dsi-panel-status-value = <0x9c>;
 		qcom,mdss-dsi-panel-max-error-count = <3>;
 
+		qcom,ulps-enabled;
+		qcom,suspend-ulps-enabled;
+
 		cm,mdss-livedisplay-cabc-ui-cmd = [
 				15 01 00 00 00 00 02 FF 23
 				15 01 00 00 00 00 02 FB 01
