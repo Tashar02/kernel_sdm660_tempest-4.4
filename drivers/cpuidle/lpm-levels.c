@@ -1814,7 +1814,6 @@ static int lpm_probe(struct platform_device *pdev)
 	unsigned int cpu;
 	struct hrtimer *cpu_histtimer;
 	struct kobject *module_kobj = NULL;
-
 	get_online_cpus();
 	lpm_root_node = lpm_of_parse_cluster(pdev);
 
