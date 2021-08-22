@@ -400,8 +400,10 @@ info_retry:
 			goto info_retry;
 		} else {
 			ret = -1;
+		}
 	} else {
 		ret = 0;
+	}
 
 	nvt_read_pid();
 	return ret;
