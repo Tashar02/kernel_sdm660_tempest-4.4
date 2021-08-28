@@ -2967,7 +2967,7 @@ static int bond_event_changename(struct bonding *bond)
 	bond_remove_proc_entry(bond);
 	bond_create_proc_entry(bond);
 
-#ifdef CONFIG_DEBUGFS
+#ifdef CONFIG_DEBUG_FS
 	bond_debug_reregister(bond);
 #endif
 
