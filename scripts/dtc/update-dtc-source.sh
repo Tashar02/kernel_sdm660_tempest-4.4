@@ -28,7 +28,7 @@
 
 set -ev
 
-DTC_UPSTREAM_PATH=`pwd`/../dtc
+DTC_UPSTREAM_PATH=`pwd`/dtc
 DTC_LINUX_PATH=`pwd`/scripts/dtc
 
 DTC_SOURCE="checks.c data.c dtc.c dtc.h flattree.c fstree.c livetree.c srcpos.c \
