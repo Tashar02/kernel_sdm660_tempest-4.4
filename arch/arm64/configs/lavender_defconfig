@@ -178,12 +178,7 @@ CONFIG_MULTIUSER=y
 # CONFIG_SYSCTL_SYSCALL is not set
 # CONFIG_KALLSYMS is not set
 CONFIG_PRINTK=y
-<<<<<<< HEAD
-CONFIG_BUG=y
-=======
 # CONFIG_BUG is not set
-CONFIG_ELF_CORE=y
->>>>>>> bad7b8c71168 (arm64/configs: Disable BUG)
 CONFIG_BASE_FULL=y
 CONFIG_FUTEX=y
 CONFIG_EPOLL=y
