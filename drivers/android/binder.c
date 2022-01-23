@@ -5968,9 +5968,9 @@ static int __init binder_init(void)
 
 	atomic_set(&binder_transaction_log.cur, ~0U);
 	atomic_set(&binder_transaction_log_failed.cur, ~0U);
-	binder_deferred_workqueue = create_singlethread_workqueue("binder");
+	binder_deferred_workqueue = alloc_workqueue("binder", WQ_HIGHPRI | WQ_UNBOUND, 0);
 	if (!binder_deferred_workqueue)
-		return -ENOMEM;
+		goto err_workqueue_init_failed;
 
 	binder_debugfs_dir_entry_root = debugfs_create_dir("binder", NULL);
 	if (binder_debugfs_dir_entry_root)
@@ -6037,6 +6037,7 @@ err_init_binder_device_failed:
 err_alloc_device_names_failed:
 	debugfs_remove_recursive(binder_debugfs_dir_entry_root);
 
+err_workqueue_init_failed:
 	destroy_workqueue(binder_deferred_workqueue);
 
 	return ret;
