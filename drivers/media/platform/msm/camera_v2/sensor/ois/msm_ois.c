@@ -456,19 +456,13 @@ static int32_t msm_ois_control(struct msm_ois_ctrl_t *o_ctrl,
 			settings);
 
 		for (i = 0; i < set_info->ois_params.setting_size; i++) {
-			if (settings[i].i2c_operation == MSM_OIS_READ) {
-				if (copy_to_user(
-					(void __user *)
-					(&set_info->ois_params.settings[i].reg_data),
-					&settings[i].reg_data,
-					sizeof(struct reg_settings_ois_t))) {
-					kfree(settings);
-					pr_err("Error copying\n");
-					return -EFAULT;
-				}
+			if (set_info->ois_params.settings[i].i2c_operation
+				== MSM_OIS_READ) {
+				set_info->ois_params.settings[i].reg_data =
+					settings[i].reg_data;
 				CDBG("ois_data at addr 0x%x is 0x%x",
-				settings[i].reg_addr,
-				settings[i].reg_data);
+				set_info->ois_params.settings[i].reg_addr,
+				set_info->ois_params.settings[i].reg_data);
 			}
 		}
 
@@ -984,6 +978,7 @@ static int32_t msm_ois_platform_probe(struct platform_device *pdev)
 			pr_err("ERR:%s: Error in reading OIS pinctrl\n",
 				__func__);
 			msm_ois_t->cam_pinctrl_status = 0;
+			rc = 0;
 		}
 	}
 

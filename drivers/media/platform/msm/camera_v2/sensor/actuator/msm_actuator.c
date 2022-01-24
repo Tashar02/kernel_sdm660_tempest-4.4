@@ -26,13 +26,8 @@ DEFINE_MSM_MUTEX(msm_actuator_mutex);
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
 #endif
 
-#ifdef CONFIG_MACH_LONGCHEER
 #define PARK_LENS_LONG_STEP 3
 #define PARK_LENS_MID_STEP 3
-#else
-#define PARK_LENS_LONG_STEP 7
-#define PARK_LENS_MID_STEP 5
-#endif
 #define PARK_LENS_SMALL_STEP 3
 #define MAX_QVALUE 4096
 
@@ -1998,6 +1993,7 @@ static int32_t msm_actuator_platform_probe(struct platform_device *pdev)
 			pr_err("ERR:%s: Error in reading actuator pinctrl\n",
 				__func__);
 			msm_actuator_t->cam_pinctrl_status = 0;
+			rc = 0;
 		}
 	}
 

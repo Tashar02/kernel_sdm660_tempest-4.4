@@ -3,7 +3,7 @@ config MSM_CAMERA_SENSOR
 	    depends on MSMB_CAMERA
 	    select NEW_LEDS
 	    select LEDS_CLASS
-        ---help---
+	---help---
           This flag enables support for Camera Sensor.
           The sensor driver is capable of providing real time
           data for camera support. The driver support V4L2
@@ -12,7 +12,7 @@ config MSM_CAMERA_SENSOR
 config MSM_CPP
         bool "QTI MSM Camera Post Processing Engine support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Camera Post-processing Engine
           The Post processing engine is capable of scaling
           and cropping image. The driver support V4L2 subdev
@@ -21,7 +21,7 @@ config MSM_CPP
 config MSM_CCI
         bool "QTI MSM Camera Control Interface support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Camera Control Interface driver only
           for those platforms that have hardware support. This driver
           is responsible for handling I2C read and write on the I2C
@@ -31,7 +31,7 @@ config MSM_CCI
 config MSM_CSI20_HEADER
         bool "QTI MSM CSI 2.0 Header"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for CSI drivers to include 2.0
           header. This header has register macros and its
           values and bit mask for register configuration bits
@@ -41,7 +41,7 @@ config MSM_CSI20_HEADER
 config MSM_CSI22_HEADER
         bool "QTI MSM CSI 2.2 Header"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for CSI drivers to include 2.2
           header. This header has register macros and its
           values and bit mask for register configuration bits
@@ -51,7 +51,7 @@ config MSM_CSI22_HEADER
 config MSM_CSI30_HEADER
         bool "QTI MSM CSI 3.0 Header"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for CSI drivers to include 3.0
           header. This header has register macros and its
           values and bit mask for register configuration bits
@@ -61,7 +61,7 @@ config MSM_CSI30_HEADER
 config MSM_CSI31_HEADER
         bool "QTI MSM CSI 3.1 Header"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for CSI drivers to include 3.0
           header. This header has register macros and its
           values and bit mask for register configuration bits
@@ -71,7 +71,7 @@ config MSM_CSI31_HEADER
 config MSM_CSIPHY
         bool "QTI MSM Camera Serial Interface Physical receiver support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Camera Serial Interface
           Physical receiver. It deserializes packets and
           supports detection of packet start and stop
@@ -80,7 +80,7 @@ config MSM_CSIPHY
 config MSM_CSID
         bool "QTI MSM Camera Serial Interface decoder support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Camera Serial Interface decoder.
           It supports lane merging and decoding of packets
           based on cid which is mapped to a virtual channel
@@ -89,7 +89,7 @@ config MSM_CSID
 config MSM_EEPROM
         bool "QTI MSM Camera ROM Interface for Calibration support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for ROM Interface for Calibration
           Provides interface for reading the Claibration data.
           and also provides support for writing data in case of FLASH ROM.
@@ -98,7 +98,7 @@ config MSM_EEPROM
 config MSM_ISPIF
         bool "QTI MSM Image Signal Processing interface support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Image Signal Processing interface module.
           This module acts as a crossbar between CSID and VFE. Output
           of any CID of CSID can be routed to of of pixel or raw
@@ -107,7 +107,7 @@ config MSM_ISPIF
 config MSM_ISPIF_V1
         bool "QTI MSM Image Signal Processing interface support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Image Signal Processing interface module.
           This module acts as a crossbar between CSID and VFE. Output
           of any CID of MSM_CSI22_HEADER can be routed to of pixel
@@ -116,7 +116,7 @@ config MSM_ISPIF_V1
 config MSM_ISPIF_V2
         bool "QTI MSM Image Signal Processing interface support"
         depends on MSMB_CAMERA
-        ---help---
+	---help---
           Enable support for Image Signal Processing interface module.
           This module acts as a crossbar between CSID and VFE. Output
           of any CID of CSID can be routed to of pixel
@@ -232,7 +232,7 @@ config MSM_GEMINI
 config MSM_FD
 	 tristate "QTI MSM FD face detection engine support"
 	 depends on MSMB_CAMERA
-	 ---help---
+	---help---
 	    Enables support for the MSM FD face detection engine.
 
 config MSM_JPEGDMA
@@ -253,3 +253,16 @@ config MSM_SEC_CCI_DEBUG
 	---help---
 	  Enables simulation of secure camera for Secure CCI Realy
 	  debugging.
+	  
+config XIAOMI_NEW_CAMERA_BLOBS
+	bool "Xiaomi new camera blobs"
+	default n
+	depends on MSM_CAMERA_SENSOR
+	---help---
+	  Enables the support for new camera blobs.
+
+config XIAOMI_CAMERA_MEME_Q
+	bool "Xiaomi new camera blobs"
+	depends on MSM_CAMERA_SENSOR
+	---help---
+	  Enables the support for MemeQ camera blobs.

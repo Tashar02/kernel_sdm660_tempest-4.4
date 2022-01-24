@@ -37,7 +37,7 @@
 #define VFE47_STATS_BURST_LEN 3
 #define VFE47_UB_SIZE_VFE0 2048
 #define VFE47_UB_SIZE_VFE1 1536
-#ifdef CONFIG_MACH_XIAOMI_NEWCAM
+#ifdef CONFIG_XIAOMI_NEW_CAMERA_BLOBS
 #define VFE47_UB_STATS_SIZE 288
 #else
 #define VFE47_UB_STATS_SIZE 144
@@ -718,10 +718,8 @@ void msm_isp47_preprocess_camif_irq(struct vfe_device *vfe_dev,
 {
 	if (irq_status0 & BIT(3))
 		vfe_dev->axi_data.src_info[VFE_PIX_0].accept_frame = false;
-	if (irq_status0 & BIT(0)) {
+	if (irq_status0 & BIT(0))
 		vfe_dev->axi_data.src_info[VFE_PIX_0].accept_frame = true;
-		vfe_dev->irq_sof_id++;
-	}
 }
 
 void msm_vfe47_reg_update(struct vfe_device *vfe_dev,
