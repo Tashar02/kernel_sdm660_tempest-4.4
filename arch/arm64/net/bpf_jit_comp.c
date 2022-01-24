@@ -62,7 +62,7 @@ struct jit_ctx {
 	int tmp_used;
 	int epilogue_offset;
 	int *offset;
-	__le32 *image;
+	u32 *image;
 };
 
 static inline void emit(const u32 insn, struct jit_ctx *ctx)
@@ -122,7 +122,7 @@ static inline int bpf2a64_offset(int bpf_to, int bpf_from,
 
 static void jit_fill_hole(void *area, unsigned int size)
 {
-	__le32 *ptr;
+	u32 *ptr;
 	/* We are guaranteed to have aligned memory. */
 	for (ptr = area; size >= sizeof(u32); size -= sizeof(u32))
 		*ptr++ = cpu_to_le32(AARCH64_BREAK_FAULT);
@@ -255,7 +255,6 @@ static int build_insn(const struct bpf_insn *insn, struct jit_ctx *ctx)
 	const s32 imm = insn->imm;
 	const int i = insn - ctx->prog->insnsi;
 	const bool is64 = BPF_CLASS(code) == BPF_ALU64;
-	const bool isdw = BPF_SIZE(code) == BPF_DW;
 	u8 jmp_cond;
 	s32 jmp_offset;
 
@@ -324,7 +323,8 @@ static int build_insn(const struct bpf_insn *insn, struct jit_ctx *ctx)
 		case BPF_MOD:
 			ctx->tmp_used = 1;
 			emit(A64_UDIV(is64, tmp, dst, src), ctx);
-			emit(A64_MSUB(is64, dst, dst, tmp, src), ctx);
+			emit(A64_MUL(is64, tmp, tmp, src), ctx);
+			emit(A64_SUB(is64, dst, dst, tmp), ctx);
 			break;
 		}
 		break;
@@ -439,7 +439,8 @@ emit_bswap_uxt:
 		ctx->tmp_used = 1;
 		emit_a64_mov_i(is64, tmp2, imm, ctx);
 		emit(A64_UDIV(is64, tmp, dst, tmp2), ctx);
-		emit(A64_MSUB(is64, dst, dst, tmp, tmp2), ctx);
+		emit(A64_MUL(is64, tmp, tmp, tmp2), ctx);
+		emit(A64_SUB(is64, dst, dst, tmp), ctx);
 		break;
 	case BPF_ALU | BPF_LSH | BPF_K:
 	case BPF_ALU64 | BPF_LSH | BPF_K:
@@ -547,6 +548,15 @@ emit_cond_jmp:
 		const struct bpf_insn insn1 = insn[1];
 		u64 imm64;
 
+		if (insn1.code != 0 || insn1.src_reg != 0 ||
+		    insn1.dst_reg != 0 || insn1.off != 0) {
+			/* Note: verifier in BPF core must catch invalid
+			 * instructions.
+			 */
+			pr_err_once("Invalid BPF_LD_IMM64 instruction\n");
+			return -EINVAL;
+		}
+
 		imm64 = (u64)insn1.imm << 32 | (u32)imm;
 		emit_a64_mov_i64(dst, imm64, ctx);
 
@@ -627,15 +637,7 @@ emit_cond_jmp:
 	case BPF_STX | BPF_XADD | BPF_W:
 	/* STX XADD: lock *(u64 *)(dst + off) += src */
 	case BPF_STX | BPF_XADD | BPF_DW:
-		emit_a64_mov_i(1, tmp, off, ctx);
-		emit(A64_ADD(1, tmp, tmp, dst), ctx);
-		emit(A64_LDXR(isdw, tmp2, tmp), ctx);
-		emit(A64_ADD(isdw, tmp2, tmp2, src), ctx);
-		emit(A64_STXR(isdw, tmp2, tmp, tmp2), ctx);
-		jmp_offset = -3;
-		check_imm19(jmp_offset);
-		emit(A64_CBNZ(0, tmp2, jmp_offset), ctx);
-		break;
+		goto notyet;
 
 	/* R0 = ntohx(*(size *)(((struct sk_buff *)R6)->data + imm)) */
 	case BPF_LD | BPF_ABS | BPF_W:
@@ -705,6 +707,10 @@ emit_cond_jmp:
 		}
 		break;
 	}
+notyet:
+		pr_info_once("*** NOT YET: opcode %02x ***\n", code);
+		return -EFAULT;
+
 	default:
 		pr_err_once("unknown opcode %02x\n", code);
 		return -EINVAL;
@@ -788,7 +794,7 @@ void bpf_int_jit_compile(struct bpf_prog *prog)
 
 	/* 2. Now, the actual pass. */
 
-	ctx.image = (__le32 *)image_ptr;
+	ctx.image = (u32 *)image_ptr;
 	ctx.idx = 0;
 
 	build_prologue(&ctx);
@@ -826,17 +832,4 @@ void bpf_jit_free(struct bpf_prog *prog)
 
 free_filter:
 	bpf_prog_unlock_free(prog);
-}
-
-void *bpf_jit_alloc_exec(unsigned long size)
-{
-	return __vmalloc_node_range(size, PAGE_SIZE, BPF_JIT_REGION_START,
-				    BPF_JIT_REGION_END, GFP_KERNEL,
-				    PAGE_KERNEL_EXEC, 0, NUMA_NO_NODE,
-				    __builtin_return_address(0));
-}
-
-void bpf_jit_free_exec(void *addr)
-{
-	return vfree(addr);
 }

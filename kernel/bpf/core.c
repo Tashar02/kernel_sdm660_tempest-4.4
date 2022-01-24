@@ -126,12 +126,14 @@ struct bpf_prog *bpf_prog_realloc(struct bpf_prog *fp_old, unsigned int size,
 
 	return fp;
 }
+EXPORT_SYMBOL_GPL(bpf_prog_realloc);
 
 void __bpf_prog_free(struct bpf_prog *fp)
 {
 	kfree(fp->aux);
 	vfree(fp);
 }
+EXPORT_SYMBOL_GPL(__bpf_prog_free);
 
 static bool bpf_is_jmp_and_has_target(const struct bpf_insn *insn)
 {
@@ -205,24 +207,6 @@ struct bpf_prog *bpf_patch_insn_single(struct bpf_prog *prog, u32 off,
 }
 
 #ifdef CONFIG_BPF_JIT
-void *__weak bpf_jit_alloc_exec(unsigned long size)
-{
-#ifdef CONFIG_MODULES
-	return module_alloc(size);
-#else
-	return vmalloc_exec(size);
-#endif
-}
-
-void __weak bpf_jit_free_exec(void *addr)
-{
-#ifdef CONFIG_MODULES
-	module_memfree(addr);
-#else
-	vfree(addr);
-#endif
-}
-
 struct bpf_binary_header *
 bpf_jit_binary_alloc(unsigned int proglen, u8 **image_ptr,
 		     unsigned int alignment,
@@ -236,7 +220,7 @@ bpf_jit_binary_alloc(unsigned int proglen, u8 **image_ptr,
 	 * random section of illegal instructions.
 	 */
 	size = round_up(proglen + sizeof(*hdr) + 128, PAGE_SIZE);
-	hdr = bpf_jit_alloc_exec(size);
+	hdr = module_alloc(size);
 	if (hdr == NULL)
 		return NULL;
 
@@ -256,7 +240,7 @@ bpf_jit_binary_alloc(unsigned int proglen, u8 **image_ptr,
 
 void bpf_jit_binary_free(struct bpf_binary_header *hdr)
 {
-	bpf_jit_free_exec(hdr);
+	module_memfree(hdr);
 }
 #endif /* CONFIG_BPF_JIT */
 
