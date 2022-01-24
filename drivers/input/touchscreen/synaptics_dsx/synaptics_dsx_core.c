@@ -4300,6 +4300,7 @@ static struct platform_driver synaptics_rmi4_driver = {
 	.driver = {
 		.name = PLATFORM_DRIVER_NAME,
 		.owner = THIS_MODULE,
+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
 #ifdef CONFIG_PM
 		.pm = &synaptics_rmi4_dev_pm_ops,
 #endif

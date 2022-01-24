@@ -3689,6 +3689,7 @@ static struct platform_driver syna_tcm_driver = {
 	.driver = {
 		.name = PLATFORM_DRIVER_NAME,
 		.owner = THIS_MODULE,
+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
 #ifdef CONFIG_PM
 		.pm = &syna_tcm_dev_pm_ops,
 #endif
