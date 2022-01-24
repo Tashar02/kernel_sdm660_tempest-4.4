@@ -5024,9 +5024,11 @@ static irqreturn_t fg_delta_msoc_irq_handler(int irq, void *data)
 	if (rc < 0)
 		pr_err("Error in validating ESR, rc=%d\n", rc);
 
+#ifndef CONFIG_MACH_XIAOMI_WAYNE
 	rc = fg_adjust_timebase(chip);
 	if (rc < 0)
 		pr_err("Error in adjusting timebase, rc=%d\n", rc);
+#endif
 
 	if (batt_psy_initialized(chip))
 		power_supply_changed(chip->batt_psy);
